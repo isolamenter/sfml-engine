@@ -3,6 +3,8 @@
 class Game
 {
   public:
+    const float PlayerSpeed = 10.f;
+
     Game();
     void run();
 
@@ -15,9 +17,9 @@ class Game
     bool mIsMovingRight;
 
     void processEvents();
-    void update();
+    void update(sf::Time);
     void render();
-    void handlePlayerInput(sf::Keyboard::Key key, bool isPressed);
+    void handlePlayerInput(sf::Keyboard::Key, bool);
 };
 
 int main()
@@ -26,7 +28,9 @@ int main()
     game.run();
 }
 
-Game::Game() : mWindow(sf::VideoMode(640, 482), "SFML TEST")
+Game::Game()
+    : mWindow(sf::VideoMode(640, 482), "SFML TEST"), mPlayer(), mIsMovingRight(false), mIsMovingLeft(false),
+      mIsMovingDown(false), mIsMovingUp(false)
 {
     mPlayer.setRadius(40.f);
     mPlayer.setPosition(100.f, 100.f);
@@ -35,10 +39,12 @@ Game::Game() : mWindow(sf::VideoMode(640, 482), "SFML TEST")
 
 void Game::run()
 {
+    sf::Clock clock;
     while (mWindow.isOpen())
     {
+        sf::Time deltaTime = clock.restart();
         processEvents();
-        update();
+        update(deltaTime);
         render();
     }
 }
@@ -65,8 +71,19 @@ void Game::processEvents()
     }
 }
 
-void Game::update()
+void Game::update(sf::Time deltaTime)
 {
+    sf::Vector2f movement(0.f, 0.f);
+    if (mIsMovingUp)
+        movement.y -= PlayerSpeed;
+    if (mIsMovingDown)
+        movement.y += PlayerSpeed;
+    if (mIsMovingLeft)
+        movement.x -= PlayerSpeed;
+    if (mIsMovingRight)
+        movement.x += PlayerSpeed;
+
+    mPlayer.move(movement * deltaTime.asSeconds());
 }
 
 void Game::render()
